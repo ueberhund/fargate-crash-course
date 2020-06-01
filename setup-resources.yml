@@ -1,0 +1,288 @@
+# 
+# Sets up resources used for gmike@'s fargate crash course
+#
+
+Resources: 
+  Cloud9:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties:
+      InstanceType: t3.micro
+      Repositories:
+        - PathComponent: /lab-content
+          RepositoryUrl: https://github.com/ueberhund/fargate-crash-course.git
+
+
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "192.168.0.0/16"
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
+      Tags:
+      - Key: Name
+        Value: !Sub 'FargateVPC-${AWS::StackName}'
+  IG:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  IGAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref IG
+      VpcId: !Ref VPC
+  IGVPCRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  IGVPCRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      RouteTableId: !Ref IGVPCRouteTable
+      GatewayId: !Ref IG
+  PrivateSubnetRoute:
+    Type: AWS::EC2::Route 
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      RouteTableId: !GetAtt Lambdatrigger.RoutetableId
+      NatGatewayId: !Ref NATGateway
+  Subnet1ToRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref IGVPCRouteTable
+      SubnetId: !Ref Subnet1
+  Subnet2ToRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref IGVPCRouteTable
+      SubnetId: !Ref Subnet2
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "192.168.1.0/26"
+      AvailabilityZone: !Select [0, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub 'PublicSubnet1-${AWS::StackName}'
+      - Key: SubnetType
+        Value: Public Subnet
+      VpcId: !Ref VPC
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "192.168.2.0/26"
+      AvailabilityZone: !Select [1, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub 'PublicSubnet2-${AWS::StackName}'
+      - Key: SubnetType
+        Value: Public Subnet
+      VpcId: !Ref VPC
+  Subnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "192.168.3.0/26"
+      AvailabilityZone: !Select [2, !GetAZs '' ]
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub 'PrivateSubnet1-${AWS::StackName}'
+      - Key: SubnetType
+        Value: Private Subnet
+      VpcId: !Ref VPC
+  Subnet4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "192.168.4.0/26"
+      AvailabilityZone: !Select [0, !GetAZs '' ]
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub 'PrivateSubnet2-${AWS::StackName}'
+      - Key: SubnetType
+        Value: Private Subnet
+      VpcId: !Ref VPC
+  PublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupName: !Sub 'PublicSecurityGroup-${AWS::StackName}'
+      GroupDescription: Public security group
+      SecurityGroupIngress:
+      -
+        IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: Name
+          Value: !Sub 'PublicSecurityGroup-${AWS::StackName}'
+  PrivateSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupName: !Sub 'PrivateSecurityGroup-${AWS::StackName}'
+      GroupDescription: Private security group
+      SecurityGroupIngress:
+      -
+        IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !GetAtt PublicSecurityGroup.GroupId
+      -
+        IpProtocol: tcp
+        FromPort: 5000
+        ToPort: 5000
+        SourceSecurityGroupId: !GetAtt PublicSecurityGroup.GroupId  
+      Tags:
+      - Key: Name
+        Value: !Sub 'PrivateSecurityGroup-${AWS::StackName}'
+  ElasticIP:
+    Type: AWS::EC2::EIP 
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt ElasticIP.AllocationId
+      SubnetId: !Ref Subnet1 
+  LoadBalancer:
+    Type : "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties :
+      Name : "Fargate-ALB"
+      SecurityGroups:
+      - !Ref PublicSecurityGroup
+      Subnets:
+      - !Ref Subnet1
+      - !Ref Subnet2
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  LambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    DependsOn: VPC 
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow 
+                Action: 
+                  - 'ec2:Describe*'
+                Resource: '*'
+              - Effect: Allow 
+                Action: 
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: 'index.lambda_handler'
+      Role: !GetAtt LambdaIAMRole.Arn
+      Code: 
+        ZipFile:
+          !Sub |
+            from __future__ import print_function
+            import json
+            import boto3 
+            import urllib
+            from botocore.vendored import requests
+
+            SUCCESS = "SUCCESS"
+            FAILED = "FAILED"
+
+            print('Loading function')
+            ec2 = boto3.client('ec2')
+
+            def lambda_handler(event, context):
+                print("Received event: " + json.dumps(event, indent=2))
+                responseData={}
+                try:
+                    if event['RequestType'] == 'Delete':
+                        print("Request Type:",event['RequestType'])
+                        print("Delete Request - No Physical resources to delete")
+                    elif event['RequestType'] == 'Create':
+                        print("Request Type:",event['RequestType'])
+                        VPCID=event['ResourceProperties']['VPCID']
+                        RouteTableId=get_vpc(VPCID)
+                        responseData={'RoutetableId':RouteTableId}
+                        print("Sending response to custom resource")
+                    elif event['RequestType'] == 'Update':
+                        print("Request Type:",event['RequestType'])
+                        VPCID=event['ResourceProperties']['VPCID']
+                        RouteTableId=get_vpc(VPCID)
+                        responseData={'RoutetableId':RouteTableId}
+                        print("Sending response to custom resource")
+                    responseStatus = 'SUCCESS'
+                except Exception as e:
+                    print('Failed to process:', e)
+                    responseStatus = 'FAILURE'
+                    responseData = {'Failure': 'Something bad happened.'}
+                send(event, context, responseStatus, responseData)
+
+            def get_vpc(VPCID):
+                response = ec2.describe_route_tables (
+                  Filters=[
+                    {
+                      'Name': 'association.main',
+                      'Values': [ 'true' ]
+                    },
+                    {
+                      'Name': 'vpc-id',
+                      'Values': [ VPCID ]
+                    }
+                  ]
+                )
+                print("Printing the VPC Route Table ID ....")
+                RouteTableId=response['RouteTables'][0]['RouteTableId']
+                print(RouteTableId)
+                return RouteTableId
+
+            def send(event, context, responseStatus, responseData, physicalResourceId=None, noEcho=False):
+                responseUrl = event['ResponseURL']
+                print(responseUrl)
+                responseBody = {'Status': responseStatus,
+                                'Reason': 'See the details in CloudWatch Log Stream: ' + context.log_stream_name,
+                                'PhysicalResourceId': physicalResourceId or context.log_stream_name,
+                                'StackId': event['StackId'],
+                                'RequestId': event['RequestId'],
+                                'LogicalResourceId': event['LogicalResourceId'],
+                                'Data': responseData}
+                json_responseBody = json.dumps(responseBody)
+                print("Response body:\n" + json_responseBody)
+                headers = {
+                    'content-type' : '',
+                    'content-length' : str(len(json_responseBody))
+                }
+                try:
+                    response = requests.put(responseUrl,
+                                            data=json_responseBody,
+                                            headers=headers)
+                    print("Status code: " + response.reason)
+                except Exception as e:
+                    print("send(..) failed executing requests.put(..): " + str(e))
+      Runtime: python3.6
+      Timeout: 50
+  Lambdatrigger:
+    Type: "Custom::RouteTableLambda"
+    Properties:
+      ServiceToken: !GetAtt LambdaFunction.Arn
+      VPCID: !Ref VPC 
