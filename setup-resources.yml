@@ -1,8 +1,12 @@
-# 
+#
 # Sets up resources used for gmike@'s fargate crash course
 #
 
-Resources: 
+Outputs:
+  LoadBalancerUrl:
+    Value: !Sub http://${LoadBalancer.DNSName}
+
+Resources:
   Cloud9:
     Type: AWS::Cloud9::EnvironmentEC2
     Properties:
@@ -46,7 +50,7 @@ Resources:
       RouteTableId: !Ref IGVPCRouteTable
       GatewayId: !Ref IG
   PrivateSubnetRoute:
-    Type: AWS::EC2::Route 
+    Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: "0.0.0.0/0"
       RouteTableId: !GetAtt Lambdatrigger.RoutetableId
@@ -140,17 +144,17 @@ Resources:
         IpProtocol: tcp
         FromPort: 5000
         ToPort: 5000
-        SourceSecurityGroupId: !GetAtt PublicSecurityGroup.GroupId  
+        SourceSecurityGroupId: !GetAtt PublicSecurityGroup.GroupId
       Tags:
       - Key: Name
         Value: !Sub 'PrivateSecurityGroup-${AWS::StackName}'
   ElasticIP:
-    Type: AWS::EC2::EIP 
+    Type: AWS::EC2::EIP
   NATGateway:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt ElasticIP.AllocationId
-      SubnetId: !Ref Subnet1 
+      SubnetId: !Ref Subnet1
   LoadBalancer:
     Type : "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties :
@@ -165,14 +169,14 @@ Resources:
         Value: !Ref "AWS::StackName"
   LambdaIAMRole:
     Type: "AWS::IAM::Role"
-    DependsOn: VPC 
+    DependsOn: VPC
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
             Principal:
-              Service: 
+              Service:
                 - lambda.amazonaws.com
             Action:
               - 'sts:AssumeRole'
@@ -182,12 +186,12 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - Effect: Allow 
-                Action: 
+              - Effect: Allow
+                Action:
                   - 'ec2:Describe*'
                 Resource: '*'
-              - Effect: Allow 
-                Action: 
+              - Effect: Allow
+                Action:
                   - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
@@ -197,12 +201,12 @@ Resources:
     Properties:
       Handler: 'index.lambda_handler'
       Role: !GetAtt LambdaIAMRole.Arn
-      Code: 
+      Code:
         ZipFile:
           !Sub |
             from __future__ import print_function
             import json
-            import boto3 
+            import boto3
             import urllib
             from botocore.vendored import requests
 
@@ -285,4 +289,4 @@ Resources:
     Type: "Custom::RouteTableLambda"
     Properties:
       ServiceToken: !GetAtt LambdaFunction.Arn
-      VPCID: !Ref VPC 
+      VPCID: !Ref VPC
