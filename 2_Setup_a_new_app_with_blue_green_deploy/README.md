@@ -1,6 +1,6 @@
 # Set up a new app with Blue/Green deploy
 
-Create a new role to allow CodeDeploy to access ECS resources on your behalf
+## Create a new role to allow CodeDeploy to access ECS resources on your behalf
 1. Go to the IAM console and click "Create Role"
 2. From the list of services, pick "CodeDeploy", then "CodeDeploy - ECS", then click the "Permissions" button
 3. Click the "Tags" button, and "Next: Review"
@@ -8,7 +8,7 @@ Create a new role to allow CodeDeploy to access ECS resources on your behalf
   
 Set up two new containers to test out Blue/Green deploys by running scripts/build-catnip.sh
 
-Create a new task
+## Create a new task
 1. Select Fargate as the launch type
 2. Give the task definition a name of "catnip"
 3. Pick the ECSTaskExecutionRole for the task role
@@ -18,14 +18,14 @@ Create a new task
 7. Add 5000 to the port mapping and click the "Add" button at the bottom of the page
 8. Click the "Create" button
 
-Add a new version of the task
+## Add a new version of the task
 1. Click the "Create new revision" button
 2. Click the container and change the image to the V2 image URL from ECS
 3. Click the "Update" button and then the "Create" button
 
 You should now have 2 versions of the catnip task
   
-Now create a blue/green enabled cluster in ECS
+## Create a blue/green enabled cluster in ECS
 
 In the demo-cluster, create a new service to support our Blue/Green application
 1. Select Fargate as the launch type
@@ -45,3 +45,12 @@ In the demo-cluster, create a new service to support our Blue/Green application
 15. Click "Next step" and "Create service"
   
 You should see v1 of the catnip application appear on the /catnip path of the application load balancer
+
+## Begin a blue/green deploy
+
+1. Go into the catnip-service and select the "Update" button
+2. Change the task definition to the latest version, which will trigger a blue/green deploy
+3. Click "Next step"
+4. Click "Next step", "Next step", "Next step", and "Update service"
+
+You will see the deploy occur in the CodeDeploy console. Once the deploy has successfully deployed the updates, you'll see those reflected at the URL. The old tasks will be deleted per CodeDeploy's configuration.
