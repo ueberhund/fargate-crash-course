@@ -28,7 +28,7 @@ You should now have 2 versions of the catnip task
 Now create a blue/green enabled cluster in ECS
 
 5. In the demo-cluster, create a new service to support our Blue/Green application 
-a. Select Fargate as the launch type
+  a. Select Fargate as the launch type
 b. Select catnip as the task definition, and 1 as the revision 
 c. If this service the name of "blue-green-service" with 2 tasks
 d. Under "Deployments", pick "Blue/green deployment", pick CodeDeployDefault.ECSAllAtOnce for the deployment configuration and select the role you created in step #1 above for the CodeDeploy service role
