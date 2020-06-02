@@ -27,20 +27,20 @@ You should now have 2 versions of the catnip task
   
 Now create a blue/green enabled cluster in ECS
 5. In the demo-cluster, create a new service to support our Blue/Green application 
-  a. Select Fargate as the launch type
-  b. Select catnip as the task definition, and 1 as the revision 
-  c. If this service the name of "blue-green-service" with 2 tasks
-  d. Under "Deployments", pick "Blue/green deployment", pick CodeDeployDefault.ECSAllAtOnce for the deployment configuration and select the role you created in step #1 above for the CodeDeploy service role
-  e. Click "Next step"
-  f. Select the FargateVPC as the cluster VPC (you may need to look up it's VPC Id from the VPC console), and add in the private subnets for this VPC
-  g. Select the PrivateSecurityGroup from this VPC and click "Save"
-  h. Select "Application Load Balancer" and select the Fargate-ALB that we've been using for these labs
-  i. Click the "Add to load balancer" button
-  j. Select port 80 as the production listener port, enter 8888 as the test listener port
-  k. In target group 1, enter the name as "catnip-target1", the path as "/catnip*" and the evaluation as 1
-  l. In the health check, change the path to "/"
-  m. In target group 2, enter the name as "catnip-target2"
-  n. Uncheck "Enable service discovery integration" and click "Next step"
-  o. Click "Next step" and "Create service"
+a. Select Fargate as the launch type
+b. Select catnip as the task definition, and 1 as the revision 
+c. If this service the name of "blue-green-service" with 2 tasks
+d. Under "Deployments", pick "Blue/green deployment", pick CodeDeployDefault.ECSAllAtOnce for the deployment configuration and select the role you created in step #1 above for the CodeDeploy service role
+e. Click "Next step"
+f. Select the FargateVPC as the cluster VPC (you may need to look up it's VPC Id from the VPC console), and add in the private subnets for this VPC
+g. Select the PrivateSecurityGroup from this VPC and click "Save"
+h. Select "Application Load Balancer" and select the Fargate-ALB that we've been using for these labs
+i. Click the "Add to load balancer" button
+j. Select port 80 as the production listener port, enter 8888 as the test listener port
+k. In target group 1, enter the name as "catnip-target1", the path as "/catnip*" and the evaluation as 1
+l. In the health check, change the path to "/"
+m. In target group 2, enter the name as "catnip-target2"
+n. Uncheck "Enable service discovery integration" and click "Next step"
+o. Click "Next step" and "Create service"
   
 You should see v1 of the catnip application appear on the /catnip path of the application load balancer
