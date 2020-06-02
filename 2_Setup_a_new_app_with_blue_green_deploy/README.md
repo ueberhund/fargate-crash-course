@@ -9,7 +9,7 @@ Create a new role to allow CodeDeploy to access ECS resources on your behalf
 Set up two new containers to test out Blue/Green deploys by running scripts/build-catnip.sh
 
 Create a new task
-1. Select Fargate as the lauynch type
+1. Select Fargate as the launch type
 2. Give the task definition a name of "catnip"
 3. Pick the ECSTaskExecutionRole for the task role
 4. Select 0.5GB for the memory and 0.25vCPU for the CPU
