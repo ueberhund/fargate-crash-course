@@ -89,7 +89,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: "192.168.3.0/26"
-      AvailabilityZone: !Select [2, !GetAZs '' ]
+      AvailabilityZone: !Select [1, !GetAZs '' ]
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
