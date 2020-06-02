@@ -1,6 +1,7 @@
 # Set up a new app with Blue/Green deploy
 
 1. Create a new role to allow CodeDeploy to access ECS resources on your behalf
+
   a. Go to the IAM console and click "Create Role"
   b. From the list of services, pick "CodeDeploy", then "CodeDeploy - ECS", then click the "Permissions" button
   c. Click the "Tags" button, and "Next: Review"
@@ -9,6 +10,7 @@
 2. Set up two new containers to test out Blue/Green deploys by running scripts/build-catnip.sh
 
 3. Create a new task
+
   a. Select Fargate as the lauynch type
   b. Give the task definition a name of "catnip"
   c. Pick the ECSTaskExecutionRole for the task role
@@ -19,6 +21,7 @@
   h. Click the "Create" button
 
 4. Add a new version of the task
+
   a. Click the "Create new revision" button
   b. Click the container and change the image to the V2 image URL from ECS
   c. Click the "Update" button and then the "Create" button
@@ -28,6 +31,7 @@ You should now have 2 versions of the catnip task
 Now create a blue/green enabled cluster in ECS
 
 5. In the demo-cluster, create a new service to support our Blue/Green application
+
   a. Select Fargate as the launch type
   b. Select catnip as the task definition, and 1 as the revision 
   c. If this service the name of "blue-green-service" with 2 tasks
