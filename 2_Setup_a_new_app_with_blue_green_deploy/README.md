@@ -1,11 +1,10 @@
 # Set up a new app with Blue/Green deploy
 
 1. Create a new role to allow CodeDeploy to access ECS resources on your behalf
-
-  a. Go to the IAM console and click "Create Role"
-  b. From the list of services, pick "CodeDeploy", then "CodeDeploy - ECS", then click the "Permissions" button
-  c. Click the "Tags" button, and "Next: Review"
-  d. Give your role a name (like "ecsCodeDeployRole") and click the "Create Role" button
+- Go to the IAM console and click "Create Role"
+- From the list of services, pick "CodeDeploy", then "CodeDeploy - ECS", then click the "Permissions" button
+- Click the "Tags" button, and "Next: Review"
+- Give your role a name (like "ecsCodeDeployRole") and click the "Create Role" button
   
 2. Set up two new containers to test out Blue/Green deploys by running scripts/build-catnip.sh
 
