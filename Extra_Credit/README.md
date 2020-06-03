@@ -18,3 +18,5 @@ You don't need to edit anything here, but a few things to keep in mind:
 
 ### How to perform an ECS deploy via CodeDeploy
 After selecting your application and deployment group, click the "Create deployment" button. You provide it a copy of your AppSpec file and click "Create deployment". If your AppSpec specifies a Lambda function for the AfterAllowTestTraffic hook, you'll see it execute. This [example lambda function](AfterAllowTestTraffic.js) will give you a good start.
+
+To execute the Lambda function, you should set up a new role (I called mine **lambda-cli-hook-role**). The role should have AWSLambdaBasicExecutionRole and you must assign a custom policy to it and grant `codedeploy:PutLifecycleEventHookExecutionStatus` permissions. 
