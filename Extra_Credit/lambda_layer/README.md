@@ -19,7 +19,8 @@ Now install all modules locally liek this:
 
 Your directory structure should look something like this:
 
-````nodejs
+````
+nodejs
 |-- package.json
 |-- node_modules
     |-- node_module1
