@@ -19,10 +19,11 @@ Now install all modules locally liek this:
 
 Your directory structure should look something like this:
 
-nodejs
+````nodejs
 |-- package.json
 |-- node_modules
     |-- node_module1
     |-- node_module2
+````
     
 Now just zip up the nodejs directory. From here, go into Lambda, select Layers, and upload this as a new Layer. Once this is set as a layer, you can go into your function and add it as a layer. At this point, your function can reference and call modules that are in your layer.
