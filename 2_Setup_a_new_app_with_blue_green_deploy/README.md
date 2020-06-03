@@ -37,9 +37,9 @@ In the demo-cluster, create a new service to support our Blue/Green application
 7. Select the PrivateSecurityGroup from this VPC and click "Save"
 8. Select "Application Load Balancer" and select the Fargate-ALB that we've been using for these labs
 9. Click the "Add to load balancer" button
-10. Select port 80 as the production listener port, enter 8888 as the test listener port
+10. Select port 80 as the production listener port
 11. In target group 1, enter the name as "catnip-target1", the path as "/catnip*" and the evaluation as 1
-12. In the health check, change the path to "/"
+12. In the health check, change the path to "/catnip"
 13. In target group 2, enter the name as "catnip-target2"
 14. Uncheck "Enable service discovery integration" and click "Next step"
 15. Click "Next step" and "Create service"
@@ -54,3 +54,7 @@ You should see v1 of the catnip application appear on the /catnip path of the ap
 4. Click "Next step", "Next step", "Next step", and "Update service"
 
 You will see the deploy occur in the CodeDeploy console. Once the deploy has successfully deployed the updates, you'll see those reflected at the URL. The old tasks will be deleted per CodeDeploy's configuration.
+
+### Notes
+
+Be aware that the lifecycle hook (**AfterAllowTestTraffic**) required to test traffic BEFORE live traffic is sent over is not enabled at this time within the ECS console. If you want to enable Blue/Green with testing the site before live traffic is redirected, you'll need to use CodeDeploy directly. See the Extra_Credit section for details on that.
