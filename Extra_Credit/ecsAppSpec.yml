@@ -1,0 +1,11 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "TASK_ARN_GOES_HERE"
+        LoadBalancerInfo:
+          ContainerName: "CONTAINER_NAME_GOES_HERE"
+          ContainerPort: CONTAINER_PORT_GOES_HERE
+Hooks:
+  - AfterAllowTestTraffic: "LAMBDA_ARN_FOR_YOUR_AFTER_ALLOW_TEST_TRAFFIC_FUNCTION_GOES_HERE"
