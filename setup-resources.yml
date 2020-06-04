@@ -5,6 +5,16 @@
 Outputs:
   LoadBalancerUrl:
     Value: !Sub http://${LoadBalancer.DNSName}
+  LoadBalancerArn:
+    Value: !Ref LoadBalancer
+  VPCId:
+    Value: !Ref VPC
+  PrivateSecurityGroup:
+    Value: !Ref PrivateSecurityGroup
+  PrivateSubnet1:
+    Value: !Ref Subnet3
+  PrivateSubnet2:
+    Value: !Ref Subnet4
 
 Resources:
   Cloud9:

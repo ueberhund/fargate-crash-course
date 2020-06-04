@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export REGION=us-west-2
+export REGION=$(aws configure get region)
 
 #Install prereqs
 sudo yum install jq -y
