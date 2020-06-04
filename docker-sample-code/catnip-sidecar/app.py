@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+import boto3
 import os
 import random
 from aws_xray_sdk.core import xray_recorder
@@ -24,12 +25,18 @@ images = [
 ]
 
 
-@app.route("/")
+@app.route("/catnip")
 def index():
     xray_recorder.begin_segment('index')
+    query_tables()
     url = random.choice(images)
     xray_recorder.end_segment()
     return render_template("index.html", url=url)
+    
+#This function exists just to add some stuff to our x-ray trace
+def query_tables():
+    client = boto3.client('dynamodb')
+    response = client.list_tables()
 
 
 if __name__ == "__main__":
