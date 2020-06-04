@@ -25,7 +25,7 @@ docker tag catnip:latest catnip:v2
 docker tag catnip:v2 $REPO:v2
 docker push $REPO:v2
 
-#Build and push th eimage for v3
+#Build and push the image for v3
 cd ../catnip-sidecar/
 docker build -t catnip .
 docker tag catnip:latest catnip:v3
