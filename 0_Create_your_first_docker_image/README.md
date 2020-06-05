@@ -12,8 +12,8 @@ In ECR:
 1. Create a new repository and copy the URL
 
 Back in Cloud9:
-1. aws ecr get-login-password | docker login --username AWS --password-stdin ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com
-2. docker tag demo ECR_REPO_NAME_FROM_STEP_1_ABOVE
-3. docker push ECR_REPO_NAME_FROM_STEP_1_ABOVE
+1. aws ecr get-login-password | docker login --username AWS --password-stdin ***ACCOUNT_ID***.dkr.ecr.REGION.amazonaws.com
+2. docker tag demo ***ECR_REPO_NAME_FROM_STEP_1_ABOVE***
+3. docker push ***ECR_REPO_NAME_FROM_STEP_1_ABOVE***
 
 You have now successfully created a docker image and pushed it to ECR
