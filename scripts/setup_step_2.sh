@@ -16,6 +16,7 @@ sudo yum install jq -y
 #Create a new role for CodeDeploy
 aws iam create-role --role-name ecsCodeDeployRole --assume-role-policy-document "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Principal\": {\"Service\": \"codedeploy.amazonaws.com\"},\"Action\": \"sts:AssumeRole\"}]}"
 aws iam attach-role-policy --role-name ecsCodeDeployRole --policy-arn arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
+export CodeDeployRoleArn=$(aws iam list-roles | jq -r '.Roles[] | select(.RoleName | contains("ecsCodeDeployRole")) | .Arn')
 
 #Build out the catnip containers
 ./build-catnip.sh
@@ -48,5 +49,16 @@ aws elbv2 create-rule --listener-arn $ListenerArn --priority 1 --conditions "[{\
 aws ecs create-service --cluster fargate-cluster --service-name catnip-service --task-definition catnip:1 --desired-count 2 \
     --launch-type "FARGATE" \
     --network-configuration "awsvpcConfiguration={subnets=[$PrivateSubnet1,$PrivateSubnet2],securityGroups=[$PrivateSecurityGroup]}" \
-    --load-balancers targetGroupArn=$TargetGroupArn1,containerName=catnip,containerPort=5000
-    
+    --load-balancers targetGroupArn=$TargetGroupArn1,containerName=catnip,containerPort=5000 \
+    --deployment-controller type=CODE_DEPLOY
+
+#Create a Blue/Green deployment with CodeDeploy
+aws deploy create-application --application-name catnip-app --compute-platform ECS
+
+aws deploy create-deployment-group --application-name catnip-app --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
+    --deployment-group-name catnip-dg --service-role-arn $CodeDeployRoleArn \
+    --auto-rollback-configuration "{\"enabled\": true,\"events\": [\"DEPLOYMENT_FAILURE\",\"DEPLOYMENT_STOP_ON_REQUEST\"]}" \
+    --deployment-style "{\"deploymentType\": \"BLUE_GREEN\",\"deploymentOption\": \"WITH_TRAFFIC_CONTROL\"}" \
+    --blue-green-deployment-configuration "{\"terminateBlueInstancesOnDeploymentSuccess\": {\"action\": \"TERMINATE\",\"terminationWaitTimeInMinutes\": 5},\"deploymentReadyOption\": {\"actionOnTimeout\": \"CONTINUE_DEPLOYMENT\",\"waitTimeInMinutes\": 0}}" \
+    --load-balancer-info "{\"targetGroupPairInfoList\": [{\"targetGroups\": [{\"name\": \"catnip-target1\"},{\"name\": \"catnip-target2\"}],\"prodTrafficRoute\": {\"listenerArns\": [\"$ListenerArn\"]}}]}" \
+    --ecs-services "[{\"serviceName\": \"catnip-service\",\"clusterName\": \"fargate-cluster\"}]"
