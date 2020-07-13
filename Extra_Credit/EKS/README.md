@@ -30,7 +30,7 @@ Deploying to EKS with Fargate is a little more complex. One important thing to n
 wget https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/rbac-role.yaml
 wget https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml
 ````
-5. You need to edit the alb-ingress-controller.yaml file and modify the following fields: `cluster-name`, `vpc-id`, `aws-region`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. Note that using a secret key and token isn't a good practice so you should be using kube2iam (or simialr) to provide IAM access.
+5. You need to edit the alb-ingress-controller.yaml file and modify the following fields: `cluster-name`, `vpc-id`, `aws-region`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. Note that using a secret key and token isn't a good practice so you should be using kube2iam (or similar) to provide IAM access.
 6. Run both of these files by running:
 ````
 kubectl apply -f rbac-role.yaml
