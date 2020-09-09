@@ -12,7 +12,6 @@ Ok, so here are the steps I followed to deploy this:
 1. Build the docker image and push to ECR
 2. Create a new task. Provide the task the image URL from step #1. In port mappings, make sure to map both ports 8080 and 9404. Remember that 8080 is for the website and 9404 is for the Prometheus metrics. Under “Docker Labels”, I added two key/value pairs: Java_EMF_Metrics with value true and ECS_PROMETHEUS_EXPORTER_PORT with value 9404. These values are used by Prometheus to auto-discover containers
 3. Create a new Fargate cluster in the ECS console. I called my cluster “hello-world-java”. Create a new service with that cluster (mine was called “hello-world-svc”) and deploy the task from the previous step. A couple of notes:
-  
   a. I deployed 2 replicas/tasks
   b. I configured my ALB to listen on port 80 (“production listener port”) and load balance to the container on port 8080. I created a new target group, and changed the health check path to “/tomcat/” (notice the trailing ‘/’).
   c. After deploying, verify that your site comes up correctly at http://ALB-DNS-NAME/tomcat/
