@@ -22,7 +22,11 @@ After a few moments, go to CloudWatch and under Metrics, you’ll see a new name
 
 [1] https://aws.amazon.com/about-aws/whats-new/2020/09/amazon-cloudwatch-monitors-prometheus-metrics-container-environments/
 [2] https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights-Prometheus-Sample-Workloads-javajmx.html#ContainerInsights-Prometheus-Sample-Workloads-javajmx-jar
+
 [3] https://github.com/prometheus/jmx_exporter
+
 [4] https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/tutorials.html
+
 [5] https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html
+
 [6] https://github.com/aws-samples/amazon-cloudwatch-container-insights/tree/master/ecs-task-definition-templates/deployment-mode/replica-service/cwagent-prometheus
