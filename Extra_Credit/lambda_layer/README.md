@@ -13,7 +13,7 @@ cd into that directory
 
 And answer the questions. It doesn't really matter what you specify, as long as your package name doesn't have the same name as the libraries you're trying to import.
 
-Now install all modules locally liek this:
+Now install all modules locally like this:
 
 `$ npm install --save module1 module2 ...`
 
