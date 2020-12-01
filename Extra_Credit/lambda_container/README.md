@@ -12,4 +12,5 @@ This container was set up based on directions from this article [1]. A couple of
 Once you get the container set up, push it to ECR. Go into Lambda and create a new container image. Once you hit "Create", it takes a minute for the function to be set up. I then created a new test event, and I was able to see the JSON returned when I executed the test event. This lambda function uses pandas, which normally requires you to use a Lambda layer. If you have an existing container workflow, this may be easier to build then creating custom layers.
 
 [1] https://docs.aws.amazon.com/lambda/latest/dg/images-create.html
+
 [2] https://docs.aws.amazon.com/lambda/latest/dg/runtimes-images.html#runtimes-api-client
