@@ -1,0 +1,40 @@
+###########################################
+# I ran this in Cloud9, so these are commands to set that environment up
+###########################################
+
+sudo yum install jq -y
+
+sudo python3 -m pip install --upgrade --force pip
+
+pip3 install aws-cdk.core aws-cdk.aws-ecs aws-cdk.aws-ecr aws-cdk.aws-iam aws-cdk.aws-ec2     
+
+npm install -g aws-cdk@latest --force
+
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+pip install awscli --upgrade
+
+###########################################
+# Commands to actually do the demo
+###########################################
+
+cdk deploy --require-approval never --app "python3 app.py"
+
+SUBNETS='<SUBNETS FROM CFN OUTPUT>'
+SECGRP='<SECGRP FROM CFN OUTPUT>'
+ECR_REPO='<ECR REPO FROM CFN OUTPUT'
+
+> run build-container.txt
+> run create-service.txt
+
+> curl IP:5000 to see output
+
+> run build-cointianer-broken.txt 
+The file has 2 commands, so you need to copy/paste separately
+
+You'll see fargate attempt to spin up the broken tasks, they'll fail, but the good tasks are unimpacted
+
+
+> aws ecs describe-services --services circuit-breaker-demo --cluster CB-Demo --query services[] | jq .[].deployments

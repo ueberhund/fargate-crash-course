@@ -1,0 +1,16 @@
+export region=$(curl 169.254.169.254/latest/meta-data/placement/region/)
+export account_id=$(aws sts get-caller-identity --output text --query Account)
+export ECR_REPO=$(aws cloudformation describe-stacks --stack-name circuit-breaker-demo --query 'Stacks[].Outputs[?ExportName == `EcrRepoUri`].OutputValue' --output text)
+export ECR_IMAGE="${ECR_REPO}:working"
+export EXECUTIONROLEARN=$(aws cloudformation describe-stacks --stack-name circuit-breaker-demo --query 'Stacks[].Outputs[?ExportName == `IAMRoleArn`].OutputValue' --output text)
+export SUBNETS=$(aws cloudformation describe-stacks --stack-name circuit-breaker-demo --query 'Stacks[].Outputs[?ExportName == `PublicSubnets`].OutputValue' --output text)
+export SECGRP=$(aws cloudformation describe-stacks --stack-name circuit-breaker-demo --query 'Stacks[].Outputs[?ExportName == `SecurityGroupId`].OutputValue' --output text)
+
+# Login to ECR and build/push docker image
+aws ecr get-login-password \
+  --region $region \
+  | docker login \
+    --username AWS \
+    --password-stdin $account_id.dkr.ecr.$region.amazonaws.com
+
+docker build -t ${ECR_IMAGE} . && docker push ${ECR_IMAGE}

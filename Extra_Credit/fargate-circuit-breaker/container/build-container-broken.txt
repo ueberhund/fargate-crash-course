@@ -1,0 +1,39 @@
+export ECR_IMAGE="${ECR_REPO}:broken"
+docker build -t ${ECR_IMAGE} . && docker push ${ECR_IMAGE}
+
+# Create task definition
+echo '{
+  "containerDefinitions": [
+    {
+      "name": "cb-demo",
+      "image": "$ECR_IMAGE",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "hostPort": 5000,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ],
+  "executionRoleArn": "$EXECUTIONROLEARN",
+  "family": "circuit-breaker",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512"
+}' | envsubst > task_definition.json  
+
+# Register task definition
+aws ecs register-task-definition --cli-input-json file://task_definition.json
+
+# Update the service and trigger a deployment
+aws ecs update-service \
+  --service circuit-breaker-demo \
+  --cluster CB-Demo \
+  --task-definition circuit-breaker \
+  --deployment-configuration "maximumPercent=200,minimumHealthyPercent=100,deploymentCircuitBreaker={enable=true,rollback=true}" \
+  --desired-count 5

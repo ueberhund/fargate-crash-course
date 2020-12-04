@@ -1,0 +1,40 @@
+# Create task definition
+echo '{
+  "containerDefinitions": [
+    {
+      "name": "cb-demo",
+      "image": "$ECR_IMAGE",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "hostPort": 5000,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ],
+  "executionRoleArn": "$EXECUTIONROLEARN",
+  "family": "circuit-breaker",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512"
+}' | envsubst > task_definition.json 
+
+# Register task definition
+aws ecs register-task-definition --cli-input-json file://task_definition.json
+
+# Create the service
+aws ecs create-service \
+  --service-name circuit-breaker-demo \
+  --cluster CB-Demo \
+  --task-definition circuit-breaker \
+  --desired-count 5 \
+  --deployment-controller type=ECS \
+  --deployment-configuration "maximumPercent=200,minimumHealthyPercent=100,deploymentCircuitBreaker={enable=true,rollback=true}" \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECGRP],assignPublicIp=ENABLED}" \
+  --launch-type FARGATE \
+  --platform-version 1.4.0
