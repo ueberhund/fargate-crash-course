@@ -1,0 +1,113 @@
+Outputs:
+  VPCId:
+    Value: !Ref VPC
+  PublicSubnet1:
+    Value: !Ref Subnet1
+  PublicSubnet2:
+    Value: !Ref Subnet2
+  PublicSecurityGroup:
+    Value: !Ref PublicSecurityGroup
+
+Resources:
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "192.168.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  IG:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  IGAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref IG
+      VpcId: !Ref VPC
+  IGVPCRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  IGVPCRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      RouteTableId: !Ref IGVPCRouteTable
+      GatewayId: !Ref IG
+  Subnet1ToRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref IGVPCRouteTable
+      SubnetId: !Ref Subnet1
+  Subnet2ToRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref IGVPCRouteTable
+      SubnetId: !Ref Subnet2
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "192.168.1.0/26"
+      AvailabilityZone: !Select [0, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+      - Key: SubnetType
+        Value: Public Subnet
+      VpcId: !Ref VPC
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: "192.168.2.0/26"
+      AvailabilityZone: !Select [1, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+      - Key: SubnetType
+        Value: Public Subnet
+      VpcId: !Ref VPC
+  PublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupName: !Sub "${AWS::StackName}-public-sg"
+      GroupDescription: Public security group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          ToPort: 80
+          FromPort: 80
+          CidrIp: "0.0.0.0/0"
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
+  PublicSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: PublicSecurityGroup
+    Properties:
+      GroupId: !Ref PublicSecurityGroup
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref PublicSecurityGroup
+  LoadBalancer:
+    Type : "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties :
+      Name : !Sub "${AWS::StackName}-alb"
+      SecurityGroups :
+      - !Ref PublicSecurityGroup
+      Subnets :
+      - !Ref Subnet1
+      - !Ref Subnet2
+      Tags:
+      - Key: Name
+        Value: !Ref "AWS::StackName"
