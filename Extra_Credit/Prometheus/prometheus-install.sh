@@ -7,7 +7,7 @@ export ECS_CLUSTER_SECURITY_GROUP=<security group id>
 export ECS_CLUSTER_SUBNET=<subnet id>
 
 aws cloudformation create-stack --stack-name CWAgent-Prometheus-ECS-${ECS_CLUSTER_NAME}-${ECS_LAUNCH_TYPE}-awsvpc \
-    --template-body file://cwagent-ecs-prometheus-metric-for-awsvpc.yaml \
+    --template-body file://install-prometheus-collector.yaml \
     --parameters ParameterKey=ECSClusterName,ParameterValue=${ECS_CLUSTER_NAME} \
                  ParameterKey=CreateIAMRoles,ParameterValue=${CREATE_IAM_ROLES} \
                  ParameterKey=ECSLaunchType,ParameterValue=${ECS_LAUNCH_TYPE} \
